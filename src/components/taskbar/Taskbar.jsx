@@ -43,7 +43,7 @@ const Taskbar = () => {
     <div className="w-full flex justify-center">
         <div id="taskbar" className="absolute bottom-5 w-[80%] mx-auto z-50 flex h-16 items-center justify-center space-x-3 p-2 backdrop-blur-xs bg-white/10 rounded-2xl shadow-lg border border-white/10">
             {tools.map( tool => (
-                <button key={tool.title} className={`flex flex-col items-center rounded-lg p-2 transition-colors duration-200 text-white hover:bg-white/10 cursor-pointer`}>
+                <button key={tool.title} title={tool.title} className={`flex flex-col items-center rounded-lg p-2 transition-colors duration-200 text-white hover:bg-white/10 cursor-pointer`}>
                     {tool.icon}
                 </button>
             ))}
