@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from "react-redux";
 import { closeWindow, focusWindow, minimizeWindow, updateWindow } from "../../features/windows/windowSlice"
+import { WindowResizer } from '../../conf/Resizer';
 
 const Window = ({ windowData }) => {
-  const windowRef = useRef(null);
   const dispatch = useDispatch();
+
+  // Refs this window uses:
+  const windowRef = useRef(null);
+  const frameRef = useRef(null);
+  const resizerRef = useRef(null);
+  // let windowResizer;
 
   // const windowState = useSelector(state => state.windows);
   // Get current data from redux about this window as we using the id
@@ -16,7 +22,7 @@ const Window = ({ windowData }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ xOffset: 0, yOffset: 0 });
 
-  const frameRef = useRef(null);
+  // const frameRef = useRef(null);
   const lastPosition = useRef(position);
 
 
@@ -69,9 +75,31 @@ const Window = ({ windowData }) => {
   });
 
   useEffect(() => {
-    if (windowRef.current) {
-      windowRef.current.style.left = `${position.xOffset}px`;
-      windowRef.current.style.top = `${position.yOffset}px`;
+    if (!windowRef.current) return;
+
+    resizerRef.current = new WindowResizer(windowRef.current);
+
+    const rightHandler = windowRef.current.querySelector(".resize-right");
+    const bottomHandler = windowRef.current.querySelector(".resize-bottom");
+    const cornerHandler = windowRef.current.querySelector(".resize-corner");
+
+    const onRight = (e) => resizerRef.current.startResize(e, "right");
+    const onBottom = (e) => resizerRef.current.startResize(e, "bottom");
+    const onCorner = (e) => resizerRef.current.startResize(e, "corner");
+
+    windowRef.current.style.left = `${position.xOffset}px`;
+    windowRef.current.style.top = `${position.yOffset}px`;
+
+    rightHandler.addEventListener("pointerdown", onRight);
+    bottomHandler.addEventListener("pointerdown", onBottom);
+    cornerHandler.addEventListener("pointerdown", onCorner);
+
+    return () => {
+      rightHandler.removeEventListener("pointerdown", onRight);
+      bottomHandler.removeEventListener("pointerdown", onBottom);
+      cornerHandler.removeEventListener("pointerdown", onCorner);
+
+      resizerRef.current?.destroy?.();
     }
   }, [position]);
 
@@ -112,6 +140,10 @@ const Window = ({ windowData }) => {
       <div className='p-4'>
         {windowData.element}
       </div>
+
+      <div className="absolute top-0 right-0 bg-transparent w-2 h-full cursor-ew-resize hover:bg-[#ffffff03] resize-right"></div>
+      <div className="absolute bottom-0 left-0 bg-transparent w-full h-2 cursor-ns-resize hover:bg-[#ffffff03] resize-bottom"></div>
+      <div className="absolute bottom-0 right-0 bg-transparent w-3.5 h-3.5 cursor-nwse-resize hover:bg-[#ffffff03] resize-corner"></div>
     </div>
   )
 }
