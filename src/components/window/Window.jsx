@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from "react-redux";
 import { closeWindow, focusWindow, minimizeWindow, updateWindow } from "../../features/windows/windowSlice"
 import { WindowResizer } from '../../conf/Resizer';
+import { tools } from "../../conf/toolsConf"
 
 const Window = ({ windowData }) => {
   const dispatch = useDispatch();
@@ -122,7 +123,7 @@ const Window = ({ windowData }) => {
         userSelect: "none",
         willChange: "transform",
       }}
-      className={`w-[450px] absolute backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border border-white/10 text-zinc-50 transition-none`}
+      className={`w-[450px] min-w-[450px] absolute backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border border-white/10 text-zinc-50 transition-none overflow-hidden`}
     >
       <div className='flex justify-between items-center px-5 py-1 border-b border-b-zinc-200 cursor-grab active:cursor-grabbing select-none' onMouseDown={handleMouseDown}>
         <h3 className='font-semibold'>{windowData.toolName}</h3>
@@ -138,7 +139,7 @@ const Window = ({ windowData }) => {
       </div>
 
       <div className='p-4'>
-        {windowData.element}
+        {tools.filter(tool => windowData?.toolName === tool?.title)[0]?.component || windowData.element}
       </div>
 
       <div className="absolute top-0 right-0 bg-transparent w-2 h-full cursor-ew-resize hover:bg-[#ffffff03] resize-right"></div>

@@ -15,7 +15,7 @@ const Taskbar = () => {
                 openWindow({
                     id: tool.id,
                     toolName: tool.title,
-                    element: tool.element || tool.title,
+                    element: tool.title,
                 })
             );
         } else if (existing.isMinimized) {
@@ -46,8 +46,7 @@ const Taskbar = () => {
                             <button
                                 // title={tool.title}
                                 onClick={() => handleToolClick(tool)}
-                                className={`flex flex-col items-center justify-center rounded-lg p-2 text-white text-xl transition-all duration-200 cursor-pointer ${isActive ? "bg-white/20 scale-105 " : "active:scale-95 hover:bg-white/10"
-                                    }`}
+                                className={`flex flex-col items-center justify-center rounded-lg p-2 text-white text-xl transition-all duration-200 cursor-pointer ${isActive ? "bg-white/20 scale-105 " : "active:scale-95 hover:bg-white/10"}`}
                             >
                                 {tool.icon}
                                 {isMinimized && (

@@ -1,3 +1,7 @@
+import Notes from "../components/notes/Notes";
+import Timer from "../components/timer/Timer";
+import Todo from "../components/todo/Todo";
+
 export const tools = [
     {
         id: "notes",
@@ -5,7 +9,15 @@ export const tools = [
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-notebook-icon lucide-notebook"><path d="M2 6h4" /><path d="M2 10h4" /><path d="M2 14h4" /><path d="M2 18h4" /><rect width="16" height="20" x="4" y="2" rx="2" /><path d="M16 2v20" /></svg>
         ),
-        component: "",
+        component: <Notes />,
+    },
+    {
+        id: "todos",
+        title: "Todos",
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-list-todo-icon lucide-list-todo"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><rect x="3" y="4" width="6" height="6" rx="1"/></svg>
+        ),
+        component: <Todo />,
     },
     {
         id: "wallpaper",
@@ -29,7 +41,7 @@ export const tools = [
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock-icon lucide-clock"><path d="M12 6v6l4 2" /><circle cx="12" cy="12" r="10" /></svg>
         ),
-        component: "",
+        component: <Timer />,
     },
     {
         id: "yt",
@@ -39,4 +51,4 @@ export const tools = [
         ),
         component: "",
     },
-]
+];
