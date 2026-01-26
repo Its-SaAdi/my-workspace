@@ -118,7 +118,8 @@ const Window = ({ windowData }) => {
       style={{
         top: `${position.yOffset}px`,
         left: `${position.xOffset}px`,
-        zIndex: isWindowActive ? 50 : 10,
+        zIndex: windowData.zIndex,
+        // zIndex: isWindowActive ? 50 : 10,
         display: windowData?.isMinimized ? "none" : "block",
         userSelect: "none",
         willChange: "transform",

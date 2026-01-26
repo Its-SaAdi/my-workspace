@@ -1,6 +1,9 @@
 import Notes from "../components/notes/Notes";
 import Timer from "../components/timer/Timer";
 import Todo from "../components/todo/Todo";
+import Wallpaper from "../components/wallpaper/Wallpaper";
+import MusicPlayer from "../components/music/MusicPlayer";
+import Youtube from "../components/youtube/Youtube";
 
 export const tools = [
     {
@@ -25,7 +28,7 @@ export const tools = [
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wallpaper-icon lucide-wallpaper"><path d="M12 17v4" /><path d="M8 21h8" /><path d="m9 17 6.1-6.1a2 2 0 0 1 2.81.01L22 15" /><circle cx="8" cy="9" r="2" /><rect x="2" y="3" width="20" height="14" rx="2" /></svg>
         ),
-        component: "",
+        component: <Wallpaper />,
     },
     {
         id: "music",
@@ -33,7 +36,7 @@ export const tools = [
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-music-icon lucide-music"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
         ),
-        component: "",
+        component: <MusicPlayer />,
     },
     {
         id: "timer",
@@ -49,6 +52,6 @@ export const tools = [
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-youtube-icon lucide-youtube"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" /></svg>
         ),
-        component: "",
+        component: <Youtube />,
     },
 ];

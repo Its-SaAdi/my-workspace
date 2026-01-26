@@ -25,16 +25,35 @@ const updateActiveWindow = (state, closedId) => {
 
 // Bring a window to front (increases zCounter, updates zIndex)
 const bringToFront = (state, targetWindow) => {
-    state.zCounter += 1;
-    targetWindow.zIndex = state.zCounter;
+    // 1. Sort windows by current zIndex (bottom → top)
+    const sorted = [...state.windows].sort(
+        (a, b) => a.zIndex - b.zIndex
+    );
+
+    // 2. Remove the target window
+    const withoutTarget = sorted.filter(w => w.id !== targetWindow.id);
+
+    // 3. Put target at the end (top)
+    withoutTarget.push(targetWindow);
+
+    // 4. Reassign zIndexes cleanly
+    withoutTarget.forEach((win, index) => {
+        win.zIndex = index + 1;
+    });
+
+    state.zCounter = withoutTarget.length;
     targetWindow.isMinimized = false;
+    state.activeWindowId = targetWindow.id;
+    // state.zCounter += 1;
+    // targetWindow.zIndex = state.zCounter;
+    // targetWindow.isMinimized = false;
 
     // Reorder so the focused window is last for rendering
-    state.windows = [
-        ...state.windows.filter(window => window.id !== targetWindow.id),
-        targetWindow,
-    ];
-    state.activeWindowId = targetWindow.id;
+    // state.windows = [
+    //     ...state.windows.filter(window => window.id !== targetWindow.id),
+    //     targetWindow,
+    // ];
+    // state.activeWindowId = targetWindow.id;
 };
 
 

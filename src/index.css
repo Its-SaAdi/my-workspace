@@ -1,7 +1,76 @@
 @import "tailwindcss";
 
+/* body {
+  font-family: 'Inter', sans-serif;
+} */
+
+.handwritten {
+  font-family: 'Dancing Script', cursive;
+}
+
 /* Glow animation for taskbar button */
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 4px rgba(255,255,255,0.6); }
-  50% { box-shadow: 0 0 8px rgba(255,255,255,0.9); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+  }
+
+  50% {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  }
 }
+
+/* Pulse for playing indicator */
+@keyframes lofiPulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.pulse-glow {
+  animation: lofiPulse 2s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.363);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255);
+  cursor: pointer;
+}
+
+/* .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+} */
