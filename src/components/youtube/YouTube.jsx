@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setVideo, updateTime, setPlaying } from '../../features/youtube/youtubeSlice'
 import { addToHistory } from '../../features/yt-history/historySlice'
 
-const Youtube = () => {
+const YouTube = () => {
     const dispatch = useDispatch()
     const { videoId, currentPlayTime, isPlaying } = useSelector(state => state.yt)
     const history = useSelector(state => state.history.videos)
@@ -180,21 +180,21 @@ const Youtube = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Paste YouTube URL or ID"
-                    className="flex-1 px-3 py-1 rounded bg-black/40 outline-none"
+                    className="flex-1 w-full p-2 bg-white/5 border border-white/10 rounded-lg outline-none resize-none focus:bg-white/10"
                 />
 
                 <button
                     onClick={handleSearch}
-                    className="px-3 py-1 bg-purple-600 rounded hover:cursor-pointer hover:bg-purple-700"
+                    className="rounded-lg py-1 px-3 text-white font-semibold transition-all duration-200 cursor-pointer bg-white/20 hover:bg-white/10"
                 >
                     Load
                 </button>
 
                 <button
                     onClick={() => setShowHistory(prev => !prev)}
-                    className="px-2 text-sm opacity-70 hover:opacity-100 bg-pink-600 rounded hover:cursor-pointer hover:bg-pink-700"
+                    className="p-2 hover:cursor-pointer rounded-lg text-white font-semibold transition-all duration-200 cursor-pointer hover:bg-white/10"
                 >
-                    🕘
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                 </button>
 
                 {showHistory && history.length > 0 && (
@@ -234,4 +234,4 @@ const Youtube = () => {
     )
 }
 
-export default Youtube
+export default YouTube

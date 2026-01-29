@@ -18,7 +18,6 @@ function App() {
     const savedId = localStorage.getItem("CURRENT_WALLPAPER_ID");
     
     const wallpaper = getWallpaperById(savedId || wallpaperId);
-    console.log(wallpaper);
     
     document.getElementById("screen-bg").style.backgroundImage = `url(${wallpaper.full})`
     
