@@ -60,7 +60,7 @@ const Wallpaper = () => {
     }
 
     const renderGrid = (items) => (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 ">
             {items.map(wallpaper => {
                 const isSelected = wallpaperId === wallpaper.id;
 

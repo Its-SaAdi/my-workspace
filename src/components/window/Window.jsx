@@ -26,6 +26,40 @@ const Window = ({ windowData }) => {
   // const frameRef = useRef(null);
   const lastPosition = useRef(position);
 
+  const HEADER_HEIGHT = 48;
+  const SNAP_THRESHOLD = 0;
+
+  const getBoundedPosition = (x, y, winEl) => {
+    if (!winEl) return { x, y };
+
+    const rect = winEl.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let boundedX = x;
+    let boundedY = y;
+
+    // Clamp horizontal
+    if (x < SNAP_THRESHOLD) boundedX = 0;
+    else if (x + rect.width > vw - SNAP_THRESHOLD)
+      boundedX = vw - rect.width;
+
+    // Clamp vertical
+    // if (y < SNAP_THRESHOLD) boundedY = 0;
+    // else if (y + rect.height > vh - SNAP_THRESHOLD)
+    //   boundedY = vh - rect.height;
+
+    // Normal window snapping
+    if (y < SNAP_THRESHOLD) boundedY = 0;
+    else if (y + rect.height > vh - SNAP_THRESHOLD)
+      boundedY = Math.min(
+        Math.max(y, 0),
+        vh - HEADER_HEIGHT
+      );
+
+    return { x: boundedX, y: boundedY };
+  };
+
 
   // --- Handle drag start ---
   const handleMouseDown = (e) => {
@@ -41,27 +75,38 @@ const Window = ({ windowData }) => {
 
   // --- Handle dragging movement ---
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
+    if (!isDragging || !windowRef.current) return;
 
-    const newX = e.clientX - offset.xOffset;
-    const newY = e.clientY - offset.yOffset;
-    lastPosition.current = { xOffset: newX, yOffset: newY };
+    const rawX = e.clientX - offset.xOffset;
+    const rawY = e.clientY - offset.yOffset;
+
+    const { x, y } = getBoundedPosition(rawX, rawY, windowRef.current);
+    lastPosition.current = { xOffset: x, yOffset: y };
 
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
     frameRef.current = requestAnimationFrame(() => {
-      if (windowRef.current) {
-        windowRef.current.style.left = `${newX}px`;
-        windowRef.current.style.top = `${newY}px`;
-      }
+      windowRef.current.style.left = `${x}px`;
+      windowRef.current.style.top = `${y}px`;
     });
   };
 
   // --- Stop dragging ---
   const handleMouseUp = () => {
-    if (!isDragging) return;
+    if (!isDragging || !windowRef.current) return;
+
     setIsDragging(false);
     cancelAnimationFrame(frameRef.current);
-    setPosition(lastPosition.current);
+
+    const { xOffset, yOffset } = lastPosition.current;
+    const { x, y } = getBoundedPosition(
+      xOffset,
+      yOffset,
+      windowRef.current
+    );
+
+    const finalPos = { xOffset: x, yOffset: y };
+
+    setPosition(finalPos);
     dispatch(updateWindow({ id: windowData.id, data: lastPosition.current }));
   };
 
@@ -139,7 +184,7 @@ const Window = ({ windowData }) => {
         </div>
       </div>
 
-      <div className='p-4'>
+      <div className='p-4 max-h-[calc(100vh-60px)] overflow-y-auto'>
         {tools.filter(tool => windowData?.toolName === tool?.title)[0]?.component || windowData.element}
       </div>
 
