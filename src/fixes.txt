@@ -14,4 +14,4 @@ MUSIC:
 
 WINDOW: 
 ======
-    1. When resized, must not go outside the current viewport screen & snapped directly to ending corners.
+    1. Resizing stops in mobile and tablet, but working on desktop.

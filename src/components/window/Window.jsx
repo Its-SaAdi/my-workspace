@@ -1,153 +1,26 @@
-import { useState, useEffect, useRef } from 'react'
-import { useDispatch, useSelector } from "react-redux";
-import { closeWindow, focusWindow, minimizeWindow, updateWindow } from "../../features/windows/windowSlice"
-import { WindowResizer } from '../../conf/Resizer';
+import { useRef } from 'react'
+import { useDispatch } from "react-redux";
+import { closeWindow, minimizeWindow } from "../../features/windows/windowSlice"
 import { tools } from "../../conf/toolsConf"
+import { useWindowBounds } from '../../hooks/useWindowBounds'
+import { useWindowDrag } from '../../hooks/useWindowDrag'
+import { useWindowResize } from '../../hooks/useWindowResize'
 
 const Window = ({ windowData }) => {
   const dispatch = useDispatch();
 
-  // Refs this window uses:
   const windowRef = useRef(null);
-  const frameRef = useRef(null);
-  const resizerRef = useRef(null);
-  // let windowResizer;
 
-  // const windowState = useSelector(state => state.windows);
-  // Get current data from redux about this window as we using the id
-  // const windowData = useSelector(state => state.win.windows[id]);
-  // const { id, toolName, element, isMinimized, position, zIndex } = windowData;
-  const isWindowActive = useSelector(state => state.win.activeWindowId === windowData.id);
+  const getBoundedPosition = useWindowBounds()
 
-  const [position, setPosition] = useState(windowData?.position || { xOffset: 20, yOffset: 20 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [offset, setOffset] = useState({ xOffset: 0, yOffset: 0 });
-
-  // const frameRef = useRef(null);
-  const lastPosition = useRef(position);
-
-  const HEADER_HEIGHT = 48;
-  const SNAP_THRESHOLD = 0;
-
-  const getBoundedPosition = (x, y, winEl) => {
-    if (!winEl) return { x, y };
-
-    const rect = winEl.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    let boundedX = x;
-    let boundedY = y;
-
-    // Clamp horizontal
-    if (x < SNAP_THRESHOLD) boundedX = 0;
-    else if (x + rect.width > vw - SNAP_THRESHOLD)
-      boundedX = vw - rect.width;
-
-    // Clamp vertical
-    // if (y < SNAP_THRESHOLD) boundedY = 0;
-    // else if (y + rect.height > vh - SNAP_THRESHOLD)
-    //   boundedY = vh - rect.height;
-
-    // Normal window snapping
-    if (y < SNAP_THRESHOLD) boundedY = 0;
-    else if (y + rect.height > vh - SNAP_THRESHOLD)
-      boundedY = Math.min(
-        Math.max(y, 0),
-        vh - HEADER_HEIGHT
-      );
-
-    return { x: boundedX, y: boundedY };
-  };
-
-
-  // --- Handle drag start ---
-  const handleMouseDown = (e) => {
-    if (e.target.closest(".window-controls")) return;
-
-    setIsDragging(true);
-    setOffset({
-      xOffset: e.clientX - position.xOffset,
-      yOffset: e.clientY - position.yOffset
-    });
-    dispatch(focusWindow(windowData.id)); // bring to front when clicked
-  };
-
-  // --- Handle dragging movement ---
-  const handleMouseMove = (e) => {
-    if (!isDragging || !windowRef.current) return;
-
-    const rawX = e.clientX - offset.xOffset;
-    const rawY = e.clientY - offset.yOffset;
-
-    const { x, y } = getBoundedPosition(rawX, rawY, windowRef.current);
-    lastPosition.current = { xOffset: x, yOffset: y };
-
-    if (frameRef.current) cancelAnimationFrame(frameRef.current);
-    frameRef.current = requestAnimationFrame(() => {
-      windowRef.current.style.left = `${x}px`;
-      windowRef.current.style.top = `${y}px`;
-    });
-  };
-
-  // --- Stop dragging ---
-  const handleMouseUp = () => {
-    if (!isDragging || !windowRef.current) return;
-
-    setIsDragging(false);
-    cancelAnimationFrame(frameRef.current);
-
-    const { xOffset, yOffset } = lastPosition.current;
-    const { x, y } = getBoundedPosition(
-      xOffset,
-      yOffset,
-      windowRef.current
-    );
-
-    const finalPos = { xOffset: x, yOffset: y };
-
-    setPosition(finalPos);
-    dispatch(updateWindow({ id: windowData.id, data: lastPosition.current }));
-  };
-
-  // Add global mouse event listeners for drag
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
+  const { position, onPointerDown } = useWindowDrag({
+    windowRef,
+    windowId: windowData.id,
+    initialPosition: windowData.position || { xOffset: 20, yOffset: 20 },
+    getBoundedPosition,
   });
 
-  useEffect(() => {
-    if (!windowRef.current) return;
-
-    resizerRef.current = new WindowResizer(windowRef.current);
-
-    const rightHandler = windowRef.current.querySelector(".resize-right");
-    const bottomHandler = windowRef.current.querySelector(".resize-bottom");
-    const cornerHandler = windowRef.current.querySelector(".resize-corner");
-
-    const onRight = (e) => resizerRef.current.startResize(e, "right");
-    const onBottom = (e) => resizerRef.current.startResize(e, "bottom");
-    const onCorner = (e) => resizerRef.current.startResize(e, "corner");
-
-    windowRef.current.style.left = `${position.xOffset}px`;
-    windowRef.current.style.top = `${position.yOffset}px`;
-
-    rightHandler.addEventListener("pointerdown", onRight);
-    bottomHandler.addEventListener("pointerdown", onBottom);
-    cornerHandler.addEventListener("pointerdown", onCorner);
-
-    return () => {
-      rightHandler.removeEventListener("pointerdown", onRight);
-      bottomHandler.removeEventListener("pointerdown", onBottom);
-      cornerHandler.removeEventListener("pointerdown", onCorner);
-
-      resizerRef.current?.destroy?.();
-    }
-  }, [position]);
+  useWindowResize(windowRef, position)
 
   // --- Window controls ---
   const handleClose = () => dispatch(closeWindow(windowData.id));
@@ -159,19 +32,17 @@ const Window = ({ windowData }) => {
   return (
     <div
       ref={windowRef}
-      onMouseDown={() => dispatch(focusWindow(windowData.id))}
       style={{
         top: `${position.yOffset}px`,
         left: `${position.xOffset}px`,
         zIndex: windowData.zIndex,
-        // zIndex: isWindowActive ? 50 : 10,
         display: windowData?.isMinimized ? "none" : "block",
         userSelect: "none",
         willChange: "transform",
       }}
       className={`w-[450px] min-w-[450px] absolute backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border border-white/10 text-zinc-50 transition-none overflow-hidden`}
     >
-      <div className='flex justify-between items-center px-5 py-1 border-b border-b-zinc-200 cursor-grab active:cursor-grabbing select-none' onMouseDown={handleMouseDown}>
+      <div className='flex justify-between items-center px-5 py-1 border-b border-b-zinc-200 cursor-grab active:cursor-grabbing touch-none select-none' onPointerDown={onPointerDown}>
         <h3 className='font-semibold'>{windowData.toolName}</h3>
 
         <div className="window-controls flex justify-between items-center gap-2">
@@ -185,7 +56,7 @@ const Window = ({ windowData }) => {
       </div>
 
       <div className='p-4 max-h-[calc(100vh-60px)] overflow-y-auto'>
-        {tools.filter(tool => windowData?.toolName === tool?.title)[0]?.component || windowData.element}
+        {tools.find(tool => windowData?.toolName === tool?.title)?.component || windowData.element}
       </div>
 
       <div className="absolute top-0 right-0 bg-transparent w-2 h-full cursor-ew-resize hover:bg-[#ffffff03] resize-right"></div>
@@ -195,100 +66,4 @@ const Window = ({ windowData }) => {
   )
 }
 
-// export { openWindow };
 export default Window
-
-// import { useRef, useEffect } from "react";
-// import { useDispatch } from "react-redux";
-// import { updateWindow, focusWindow } from "../../features/window-ui/windowSlice";
-
-// const Window = ({ windowData }) => {
-//   const dispatch = useDispatch();
-//   const windowRef = useRef(null);
-//   const pos = useRef({
-//     x: windowData.position?.xOffset || 100,
-//     y: windowData.position?.yOffset || 100,
-//   });
-//   const offset = useRef({ x: 0, y: 0 });
-//   const isDragging = useRef(false);
-
-//   const handleMouseDown = (e) => {
-//     if (e.button !== 0) return;
-//     isDragging.current = true;
-
-//     const rect = windowRef.current.getBoundingClientRect();
-//     offset.current = {
-//       x: e.clientX - rect.left,
-//       y: e.clientY - rect.top,
-//     };
-
-//     dispatch(focusWindow(windowData.id));
-//     document.body.style.userSelect = "none";
-//   };
-
-//   const handleMouseMove = (e) => {
-//     if (!isDragging.current) return;
-
-//     const newX = e.clientX - offset.current.x;
-//     const newY = e.clientY - offset.current.y;
-
-//     pos.current = { x: newX, y: newY };
-
-//     // Instant visual update (no React state)
-//     windowRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
-//   };
-
-//   const handleMouseUp = () => {
-//     if (!isDragging.current) return;
-//     isDragging.current = false;
-//     document.body.style.userSelect = "auto";
-
-//     // Commit final position to Redux
-//     dispatch(
-//       updateWindow({
-//         id: windowData.id,
-//         data: {
-//           xOffset: pos.current.x,
-//           yOffset: pos.current.y,
-//         },
-//       })
-//     );
-//   };
-
-//   // Attach global listeners
-//   useEffect(() => {
-//     document.addEventListener("mousemove", handleMouseMove);
-//     document.addEventListener("mouseup", handleMouseUp);
-//     return () => {
-//       document.removeEventListener("mousemove", handleMouseMove);
-//       document.removeEventListener("mouseup", handleMouseUp);
-//     };
-//   }, []);
-
-//   // Apply initial transform from stored position
-//   useEffect(() => {
-//     windowRef.current.style.transform = `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)`;
-//   }, [windowData.position]);
-
-//   return (
-//     <div
-//       ref={windowRef}
-//       style={{
-//         position: "absolute",
-//         zIndex: windowData.zIndex,
-//         willChange: "transform", // Hint GPU to optimize
-//       }}
-//       className="select-none bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg text-white w-[400px] h-[300px]"
-//     >
-//       <div
-//         onMouseDown={handleMouseDown}
-//         className="cursor-grab active:cursor-grabbing px-4 py-2 bg-white/20 rounded-t-2xl font-medium"
-//       >
-//         {windowData.toolName}
-//       </div>
-//       <div className="p-4 text-sm overflow-auto">{windowData.element}</div>
-//     </div>
-//   );
-// };
-
-// export default Window;
