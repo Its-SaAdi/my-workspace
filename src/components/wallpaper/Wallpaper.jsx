@@ -1,62 +1,79 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setWallpaperId } from '../../features/wallpaper/wallpaperSlice'
 import { getAllWallpapers, saveCustomWallpapers, deleteCustomWallpaper } from "../../conf/wallpaperConf"
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 const Wallpaper = () => {
     const dispatch = useDispatch();
     const wallpaperId = useSelector(state => state.wall.wallpaperId);
-    const wallpapers = getAllWallpapers();
+    // const wallpapers = getAllWallpapers();
 
     const inputFileRef = useRef(null);
-    const [refreshKey, setRefreshKey] = useState(0);
+    const [wallpapers, setWallpapers] = useState(() => getAllWallpapers());
 
-    const customBg = wallpapers.filter(wallpaper => wallpaper.type === "custom");
-    const builtInBg = wallpapers.filter(wallpaper => wallpaper.type === "builtin");
+    const customBg = useMemo(
+        () => wallpapers.filter(wallpaper => wallpaper.type === "custom"),
+        [wallpapers]
+    );
+    const builtInBg = useMemo(
+        () => wallpapers.filter(wallpaper => wallpaper.type === "builtin"),
+        [wallpapers]
+    )
 
-    const handleImageClick = (id) => {
+    const selectWallpaper = (id) => {
         dispatch(setWallpaperId(id))
         localStorage.setItem("CURRENT_WALLPAPER_ID", id);
-        console.log("Selected:", id);
     };
 
     const handleUpload = (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files?.[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) return;
-        if (!file.type.startsWith("image/")) return;
+
+        if (file.size > MAX_FILE_SIZE) {
+            console.warn("Wallpaper exceeds size limit");
+            e.target.value = ""
+            return
+        };
+
+        if (!file.type.startsWith("image/")) {
+            console.warn("Only image files are allowed");
+            e.target.value = ""
+            return
+        };
 
         const fileReader = new FileReader();
 
-        fileReader.onload = (event) => {
-            const base64 = event.target.result;
+        fileReader.onload = () => {
+            //const base64 = event.target.result;
 
             const newWallpaper = {
-                id: `custom-${Date.now()}`,
+                id: crypto.randomUUID(),
                 type: "custom",
                 name: file.name,
-                thumbnail: base64,
-                full: base64,
+                thumbnail: fileReader.result,
+                full: fileReader.result,
             };
 
             saveCustomWallpapers(newWallpaper);
-            dispatch(setWallpaperId(newWallpaper.id));
-            localStorage.setItem("CURRENT_WALLPAPER_ID", newWallpaper.id);
+            setWallpapers(prev => [...prev, newWallpaper])
+            selectWallpaper(newWallpaper.id);
         };
 
         fileReader.readAsDataURL(file);
+        e.target.value = ""
     };
 
     const handleDelete = (event, id) => {
         event.stopPropagation();
+        
         deleteCustomWallpaper(id);
+        setWallpapers(prev => prev.filter(wallpaper => wallpaper.id !== id))
 
         if (wallpaperId === id) {
-            dispatch(setWallpaperId("lofi-bg"))
-            localStorage.setItem("CURRENT_WALLPAPER_ID", "lofi-bg");
+            selectWallpaper("lofi-bg")
         }
-
-        setRefreshKey(prev => prev + 1);
     }
 
     const renderGrid = (items) => (
@@ -67,7 +84,7 @@ const Wallpaper = () => {
                 return (
                     <div
                         key={wallpaper.id}
-                        onClick={() => handleImageClick(wallpaper.id)}
+                        onClick={() => selectWallpaper(wallpaper.id)}
                         className={`
                             group relative cursor-pointer rounded-md overflow-hidden
                             transition-all duration-200
@@ -90,6 +107,8 @@ const Wallpaper = () => {
 
                         {wallpaper.type === "custom" && (
                             <button
+                                type="button"
+                                aria-label="Delete wallpaper"
                                 className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 transition cursor-pointer"
                                 onClick={(e) => handleDelete(e, wallpaper.id)}
                             >
@@ -106,8 +125,9 @@ const Wallpaper = () => {
         <div className="space-y-6">
             <section>
                 <button
+                    type="button"
                     className="bg-white/10 hover:bg-white/20 rounded-lg py-2 px-3 flex items-center gap-2 text-sm text-white font-semibold transition-all duration-200 cursor-pointer"
-                    onClick={() => inputFileRef.current.click()}
+                    onClick={() => inputFileRef.current?.click()}
                 >
                     Upload
                     <span>
@@ -120,7 +140,7 @@ const Wallpaper = () => {
                     type="file"
                     name="wallpapar"
                     id="wallpaper"
-                    accept="image/*"
+                    accept="image/webp, image/*"
                     onChange={handleUpload}
                     hidden
                 />
