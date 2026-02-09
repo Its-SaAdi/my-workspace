@@ -8,7 +8,7 @@ const Todo = () => {
     const [editingId, setEditingId] = useState(null);
     const [editingText, setEditingText] = useState("");
 
-    const [undoData, setUndoData] = useState(null);
+    // const [undoData, setUndoData] = useState(null);
 
     useEffect(() => {
         const storedTodos = JSON.parse(localStorage.getItem("workspace.todos")) || [];
@@ -16,7 +16,6 @@ const Todo = () => {
     }, [])
 
     useEffect(() => {
-        if (todos.length === 0) return;
         localStorage.setItem("workspace.todos", JSON.stringify(todos));
     }, [todos]);
 
@@ -50,40 +49,40 @@ const Todo = () => {
     const deleteTodo = (id, event) => {
         event.stopPropagation();
 
-        if (undoData) {
-            clearTimeout(undoData.timeoutId);
-            setUndoData(null);
-        }
+        // if (undoData) {
+        //     clearTimeout(undoData.timeoutId);
+        //     setUndoData(null);
+        // }
 
-        let index = todos.findIndex(todo => todo.id === id);
-        let deleteTodo = todos[index];
+        // let index = todos.findIndex(todo => todo.id === id);
+        // let deleteTodo = todos[index];
 
         setTodos(prev => prev.filter(todo => todo.id !== id));
 
-        const timeoutId = setTimeout(() => {
-            setUndoData(null);
-        }, 5000);
+        // const timeoutId = setTimeout(() => {
+        //     setUndoData(null);
+        // }, 5000);
 
-        setUndoData({
-            todo: deleteTodo,
-            index,
-            timeoutId,
-        })
+        // setUndoData({
+        //     todo: deleteTodo,
+        //     index,
+        //     timeoutId,
+        // })
     }
 
-    const undoDelete = () => {
-        if (!undoData) return;
+    // const undoDelete = () => {
+    //     if (!undoData) return;
 
-        clearTimeout(undoData.timeoutId);
+    //     clearTimeout(undoData.timeoutId);
 
-        setTodos(prev => {
-            const copy = [...prev];
-            copy.splice(undoData.index, 0, undoData.todo);
-            return copy;
-        });
+    //     setTodos(prev => {
+    //         const copy = [...prev];
+    //         copy.splice(undoData.index, 0, undoData.todo);
+    //         return copy;
+    //     });
 
-        setUndoData(null);
-    }
+    //     setUndoData(null);
+    // }
 
     const startEditing = (todo) => {
         setEditingId(todo.id);
@@ -144,9 +143,9 @@ const Todo = () => {
     const renderTodos = () => {
         const list = [...filteredTodos];
 
-        if (undoData) {
-            list.splice(undoData.index, 0, { __undo: true });
-        }
+        // if (undoData) {
+        //     list.splice(undoData.index, 0, { __undo: true });
+        // }
 
         return list;
     };
@@ -201,26 +200,26 @@ const Todo = () => {
                 {filteredTodos.length === 0 ? (
                     <p className="text-white/40 italic">No todos yet.</p>
                 ) : renderTodos().map((todo, index) => {
-                    if (todo.__undo) {
-                        return (
-                            <div
-                                key="undo"
-                                className="relative rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-4 py-3 flex items-center justify-between animate-pulse"
-                            >
-                                <div className="flex items-center gap-2 text-yellow-300 text-sm font-medium">
-                                    <span>Todo deleted</span>
-                                    <span className="text-xs text-yellow-300/60">(5s)</span>
-                                </div>
+                    // if (todo.__undo) {
+                    //     return (
+                    //         <div
+                    //             key="undo"
+                    //             className="relative rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-4 py-3 flex items-center justify-between animate-pulse"
+                    //         >
+                    //             <div className="flex items-center gap-2 text-yellow-300 text-sm font-medium">
+                    //                 <span>Todo deleted</span>
+                    //                 <span className="text-xs text-yellow-300/60">(5s)</span>
+                    //             </div>
 
-                                <button
-                                    onClick={undoDelete}
-                                    className="text-yellow-200 font-semibold hover:underline"
-                                >
-                                    Undo
-                                </button>
-                            </div>
-                        );
-                    } else {
+                    //             <button
+                    //                 onClick={undoDelete}
+                    //                 className="text-yellow-200 font-semibold hover:underline"
+                    //             >
+                    //                 Undo
+                    //             </button>
+                    //         </div>
+                    //     );
+                    // } else {
                         return (
                             <div
                                 key={todo.id}
@@ -247,7 +246,7 @@ const Todo = () => {
 
                                 {editingId !== todo.id && (
                                     <button
-                                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 transition -pointer"
+                                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 transition cursor-pointer"
                                         onClick={(e) => deleteTodo(todo.id, e)}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash2-icon lucide-trash-2 text-white/60 hover:text-red-500 transition"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
@@ -255,7 +254,7 @@ const Todo = () => {
                                 )}
                             </div>
                         )
-                    }
+                    // }
                 })}
 
             </div>

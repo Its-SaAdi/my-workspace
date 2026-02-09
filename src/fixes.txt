@@ -1,7 +1,3 @@
-TODOS: 
-======
-    1. Last deleted todo item is not completely updated to localStorage and keep getting fetched.
-
 WALLPAPER: 
 ======
     1. Last deleted custom wallpaper doesn't loads back the default one and is not updated on localStorage.
