@@ -1,4 +1,5 @@
 import Notes from "../components/notes/Notes";
+import EnhancedNotes from '../components/notes/EnhancedNotes'
 import Timer from "../components/timer/Timer";
 import Todo from "../components/todo/Todo";
 import Wallpaper from "../components/wallpaper/Wallpaper";

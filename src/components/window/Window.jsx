@@ -36,11 +36,11 @@ const Window = ({ windowData }) => {
         top: `${position.yOffset}px`,
         left: `${position.xOffset}px`,
         zIndex: windowData.zIndex,
-        display: windowData?.isMinimized ? "none" : "block",
+        display: windowData?.isMinimized ? "none" : "flex",
         userSelect: "none",
         willChange: "transform",
       }}
-      className={`w-[450px] min-w-[450px] absolute backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border border-white/10 text-zinc-50 transition-none overflow-hidden`}
+      className={`flex flex-col w-[400px] min-w-[400px] sm:w-[450px]  max-h-[calc(100vh-60px)] absolute backdrop-blur-lg bg-white/10 rounded-xl shadow-lg border border-white/10 text-zinc-50 transition-none overflow-hidden`}
     >
       <div className='flex justify-between items-center px-5 py-1 border-b border-b-zinc-200 cursor-grab active:cursor-grabbing touch-none select-none' onPointerDown={onPointerDown}>
         <h3 className='font-semibold'>{windowData.toolName}</h3>
@@ -55,13 +55,13 @@ const Window = ({ windowData }) => {
         </div>
       </div>
 
-      <div className='p-4 max-h-[calc(100vh-60px)] overflow-y-auto'>
+      <div className='flex-1 p-4 overflow-y-auto'>
         {tools.find(tool => windowData?.toolName === tool?.title)?.component || windowData.element}
       </div>
 
-      <div className="absolute top-0 right-0 bg-transparent w-2 h-full cursor-ew-resize hover:bg-[#ffffff03] resize-right"></div>
-      <div className="absolute bottom-0 left-0 bg-transparent w-full h-2 cursor-ns-resize hover:bg-[#ffffff03] resize-bottom"></div>
-      <div className="absolute bottom-0 right-0 bg-transparent w-3.5 h-3.5 cursor-nwse-resize hover:bg-[#ffffff03] resize-corner"></div>
+      <div className="absolute top-0 right-0 bg-transparent w-2 h-full touch-none cursor-ew-resize hover:bg-[#ffffff03] resize-right"></div>
+      <div className="absolute bottom-0 left-0 bg-transparent w-full h-2 touch-none cursor-ns-resize hover:bg-[#ffffff03] resize-bottom"></div>
+      <div className="absolute bottom-0 right-0 bg-transparent w-3.5 h-3.5 touch-none cursor-nwse-resize hover:bg-[#ffffff03] resize-corner"></div>
     </div>
   )
 }

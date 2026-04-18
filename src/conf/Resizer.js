@@ -9,14 +9,13 @@ export class WindowResizer {
 
         this.isDragging = false;
         this.resizeDirection = null;
-        // this.resizeRef = null;
+        this.rafRef = null; // raf => request animation frame
 
         this._onPointerMove = this.handleResize.bind(this);
         this._onPointerUp = this.stopResize.bind(this);
-
     }
 
-    startResize(e, direction) {
+    startResize(e, direction, handleEl) {
         // e.preventDefault();
         this.isDragging = true;
         this.resizeDirection = direction;
@@ -29,9 +28,11 @@ export class WindowResizer {
         this.startHeight = rect.height;
 
         document.body.style.userSelect = "none";
-        
+
+        const captureTarget = handleEl || e.currentTarget || e.target;
+
         try {
-            e.target.setPointerCapture(e.pointerId);
+            captureTarget.setPointerCapture(e.pointerId);
         } catch (error) {
             console.warn("Couldn't find any event object at startResize()");
         }
@@ -41,46 +42,54 @@ export class WindowResizer {
 
         document.addEventListener("pointermove", this._onPointerMove);
         document.addEventListener("pointerup", this._onPointerUp);
-
     }
 
     handleResize(e) {
         if (!this.isDragging) return;
-        // if (this.resizeRef) return;
 
-        // this.resizeRef = requestAnimationFrame(() => {
+        cancelAnimationFrame(this.rafRef);
+        this.rafRef = requestAnimationFrame(() => {
+            const dx = e.clientX - this.startX;
+            const dy = e.clientY - this.startY;
+
+            if (this.resizeDirection === "right" || this.resizeDirection === "corner") {
+                this.element.style.width = Math.max(this.startWidth + dx, 300) + "px";
+            }
+            if (this.resizeDirection === "bottom" || this.resizeDirection === "corner") {
+                this.element.style.height = Math.max(this.startHeight + dy, 140) + "px";
+            }
+        });
+
+        // let dx = e.clientX - this.startX;
+        // let dy = e.clientY - this.startY;
+
+        // // console.log(dx, dy);
 
 
-        //     this.resizeRef = null;
-        // });
+        // // const MIN_W = 250;
+        // // const MIN_H = 150;
+        // // const MAX_W = 900;
+        // // const MAX_H = 700;
 
-        let dx = e.clientX - this.startX;
-        let dy = e.clientY - this.startY;
-
-        // console.log(dx, dy);
-
-
-        // const MIN_W = 250;
-        // const MIN_H = 150;
-        // const MAX_W = 900;
-        // const MAX_H = 700;
-
-        if (this.resizeDirection === "right" || this.resizeDirection === "corner") {
-            this.element.style.width = Math.max(this.startWidth + dx, 300) + "px";
-        }
-        if (this.resizeDirection === "bottom" || this.resizeDirection === "corner") {
-            this.element.style.height = Math.max(this.startHeight + dy, 140) + "px";
-        }
+        // if (this.resizeDirection === "right" || this.resizeDirection === "corner") {
+        //     this.element.style.width = Math.max(this.startWidth + dx, 300) + "px";
+        // }
+        // if (this.resizeDirection === "bottom" || this.resizeDirection === "corner") {
+        //     this.element.style.height = Math.max(this.startHeight + dy, 140) + "px";
+        // }
     }
 
     stopResize(e) {
         this.isDragging = false;
         this.resizeDirection = null;
 
+        cancelAnimationFrame(this.rafRef);
+        this.rafRef = null;
+
         document.body.style.userSelect = "auto";
-        
+
         try {
-            e.target.releasePointerCapture?.(e.pointerId);
+            (e.currentTarget || e.target)?.releasePointerCapture?.(e.pointerId);
         } catch (error) {
             console.warn("Couldn't find the event object at stopResize()");
         }
@@ -94,6 +103,7 @@ export class WindowResizer {
 
     // final cleanup if component unmounts
     destroy() {
+        cancelAnimationFrame(this.rafRef);
         document.removeEventListener("pointermove", this._onPointerMove);
         document.removeEventListener("pointerup", this._onPointerUp);
     }

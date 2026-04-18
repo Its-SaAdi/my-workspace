@@ -15,9 +15,9 @@ export const useWindowResize = (windowRef, position) => {
     const bottom = el.querySelector(".resize-bottom");
     const corner = el.querySelector(".resize-corner");
 
-    const onRight = (e) => resizerRef.current.startResize(e, "right");
-    const onBottom = (e) => resizerRef.current.startResize(e, "bottom");
-    const onCorner = (e) => resizerRef.current.startResize(e, "corner");
+    const onRight = (e) => resizerRef.current.startResize(e, "right",  e.currentTarget);
+    const onBottom = (e) => resizerRef.current.startResize(e, "bottom", e.currentTarget);
+    const onCorner = (e) => resizerRef.current.startResize(e, "corner", e.currentTarget);
 
     el.style.left = `${position.xOffset}px`;
     el.style.top = `${position.yOffset}px`;
