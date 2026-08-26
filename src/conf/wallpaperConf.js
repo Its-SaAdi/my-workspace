@@ -127,43 +127,7 @@ export const BUILTIN_WALLPAPERS = [
     },
 ];
 
-const CUSTOM_WALLPAPER_KEY = "workspace.customWallpapers";
-
-export function getCustomWallpapers() {
-    try {
-        const data = JSON.parse(localStorage.getItem(CUSTOM_WALLPAPER_KEY));
-        return Array.isArray(data) ? data : [];
-    } catch {
-        return [];
-    }
-}
-
-export function saveCustomWallpapers(newWallpaper) {
-    const existing = getCustomWallpapers();
-
-    const updated = [newWallpaper, ...existing]
-    localStorage.setItem(CUSTOM_WALLPAPER_KEY, JSON.stringify(updated));
-}
-
-export function deleteCustomWallpaper(wallpaperId) {
-    const existing = getCustomWallpapers();
-    const updated = existing.filter(wallpaper => wallpaper.id !== wallpaperId);
-    localStorage.setItem(CUSTOM_WALLPAPER_KEY, JSON.stringify(updated));
-}
-
-export function getAllWallpapers() {
-    const customWallpapers = getCustomWallpapers();
-    return [
-        ...customWallpapers,
-        ...BUILTIN_WALLPAPERS,
-    ]
-}
-
 export function getBuiltInWallpaperById(wallpaperId) {
-    const data = BUILTIN_WALLPAPERS.filter(wallpaper => wallpaper.id === wallpaperId);
-    return data[0].full;
-}
-
-export function getWallpaperById(id) {
-    return getAllWallpapers().find(wallpaper => wallpaper.id === id);
+    const data = BUILTIN_WALLPAPERS.find(wallpaper => wallpaper.id === wallpaperId);
+    return data?.full ?? null;
 }

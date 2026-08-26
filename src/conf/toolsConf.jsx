@@ -4,6 +4,7 @@ import Timer from "../components/timer/Timer";
 import Todo from "../components/todo/Todo";
 import Wallpaper from "../components/wallpaper/Wallpaper";
 import MusicPlayer from "../components/music/MusicPlayer";
+// import MusicPlayer from "../components/music/MusicPlayer2";
 import YouTube from "../components/youtube/YouTube";
 
 export const tools = [

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { getWallpaperById } from "./conf/wallpaperConf";
+import { useEffect } from "react"
+import { useSelector } from "react-redux"
+import { BUILTIN_WALLPAPERS } from "./conf/wallpaperConf";
+import { getCustomWallpapers } from "./conf/wallpaperStorageService";
 import Clock from "./components/clock/Clock"
 import Taskbar from "./components/taskbar/Taskbar"
 import Window from "./components/window/Window"
@@ -9,18 +10,39 @@ function App() {
   // const [windowState, setWindowState] = useState([]);
   // let nextWindowId = 1;
 
-  const dispatch = useDispatch();
   const windowState = useSelector((state) => state.win);
   const wallpaperId = useSelector((state) => state.wall.wallpaperId);
-  let bgImg = "";
+
+  const applyBackground = (url) => {
+    document.getElementById("screen-bg").style.backgroundImage = `url(${url})`;
+  }
 
   useEffect(() => {
-    const savedId = localStorage.getItem("CURRENT_WALLPAPER_ID");
-    
-    const wallpaper = getWallpaperById(savedId || wallpaperId);
-    
-    document.getElementById("screen-bg").style.backgroundImage = `url(${wallpaper.full})`
-    
+    const savedId = localStorage.getItem("CURRENT_WALLPAPER_ID") || wallpaperId;
+
+    const builtin = BUILTIN_WALLPAPERS.find(wallpaper => wallpaper.id === savedId);
+    if (builtin) {
+      applyBackground(builtin.full);
+      return;
+    }
+
+    getCustomWallpapers()
+      .then(customWallpapers => {
+        const custom = customWallpapers.find(wallpaper => wallpaper.id === savedId);
+        if (custom) {
+          applyBackground(custom.full);
+        } else {
+          // Saved ID no longer exists — fall back to default
+          const fallback = BUILTIN_WALLPAPERS.find(wallpaper => wallpaper.id === "lofi-bg");
+          applyBackground(fallback.full);
+        }
+      })
+      .catch(() => {
+        // On any error fall back to default
+        const fallback = BUILTIN_WALLPAPERS.find(wallpaper => wallpaper.id === "lofi-bg");
+        applyBackground(fallback.full);
+      });
+
   }, [wallpaperId]);
 
   return (
