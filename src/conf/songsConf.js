@@ -3,6 +3,7 @@ export const songs = [
         id: '1',
         title: 'Rainy Night In Tokyo',
         artist: 'Lofi Girl',
+        duration: "6:12",
         url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
         cover: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=300&h=300&fit=crop'
     },
@@ -10,6 +11,7 @@ export const songs = [
         id: '2',
         title: 'Nostalgia',
         artist: 'ChillHop Music',
+        duration: "7:05",
         url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
         cover: 'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300&h=300&fit=crop'
     },
@@ -17,6 +19,7 @@ export const songs = [
         id: '3',
         title: 'Coffee and Dreams',
         artist: 'Study Beats',
+        duration: "5:44",
         url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
         cover: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop'
     },
@@ -24,6 +27,7 @@ export const songs = [
         id: '4',
         title: 'Neon Whispers',
         artist: 'Synth Vibes',
+        duration: "5:02",
         url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
         cover: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300&h=300&fit=crop'
     },
@@ -31,6 +35,7 @@ export const songs = [
         id: '5',
         title: 'Midnight Snack',
         artist: 'Lo-Fi Panda',
+        duration: "5:25",
         url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
         cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop'
     },

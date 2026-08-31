@@ -1,24 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { songs } from '../../conf/songsConf';
+import { setCurrentTrack, setIsPlaying, setCurrentTime } from '../../features/music/musicSlice';
 
 const Music = () => {
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const dispatch = useDispatch()
+  const { currentIndex, isPlaying, progress } = useSelector(state => state.music)
+
+  // const [currentSong, setCurrentSong] = useState(null);
+  // const [isPlaying, setIsPlaying] = useState(false);
+  // const [progress, setProgress] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false)
 
   const audioRef = useRef(null);
   const progressBarRef = useRef(null)
 
-  const getCurrentIndex = () => {
-    if (!currentSong) return -1;
-    return songs.findIndex(song => song.id === currentSong.id);
-  };
+  const currentSong = currentIndex !== null ? songs[currentIndex] : null
+
+  // const getCurrentIndex = () => {
+  //   if (!currentSong) return -1;
+  //   return songs.findIndex(song => song.id === currentSong.id);
+  // };
 
   const playSong = (song) => {
-    setCurrentSong(song)
-    setProgress(0)
-    setIsPlaying(true)
+    const index = songs.findIndex(s => s.id === song.id)
+    dispatch(setCurrentTrack({ id: song.id, index }))
+    dispatch(setIsPlaying(true))
   }
 
   // const getNextSongIndex = () => {
@@ -34,13 +41,13 @@ const Music = () => {
   // };
 
   const setPreviousSong = () => {
-    const index = getCurrentIndex()
+    const index = currentIndex ?? -1
     const prevIndex = (index - 1 + songs.length) % songs.length
     playSong(songs[prevIndex])
   }
 
   const setNextSong = () => {
-    const index = getCurrentIndex()
+    const index = currentIndex ?? -1
     const nextIndex = (index + 1) % songs.length
     playSong(songs[nextIndex])
   }
@@ -49,10 +56,10 @@ const Music = () => {
     if (!audioRef.current) return;
 
     if (isPlaying) {
-      setIsPlaying(false);
+      dispatch(setIsPlaying(false))
       audioRef.current.pause();
     } else {
-      setIsPlaying(true);
+      dispatch(setIsPlaying(true))
       audioRef.current.play();
     }
   }
@@ -69,7 +76,10 @@ const Music = () => {
     const duration = audioRef.current.duration || 0;
     audioRef.current.currentTime = (percent / 100) * duration;
 
-    setProgress(percent);
+    dispatch(setCurrentTime({
+      currentTime: audioRef.current.currentTime,
+      progress: percent,
+    }));
   };
 
   const handleBarClick = (e) => {
@@ -110,7 +120,10 @@ const Music = () => {
       const { currentTime, duration } = audioRef.current;
       if (!duration) return;
 
-      setProgress((currentTime / duration) * 100);
+      dispatch(setCurrentTime({
+        currentTime,
+        progress: (currentTime / duration) * 100,
+      }));
     };
 
     const handleEnded = () => {
@@ -125,7 +138,7 @@ const Music = () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [currentSong]);
+  }, [currentSong, isSeeking]);
 
   useEffect(() => {
     window.addEventListener("pointermove", handlePointerMove);

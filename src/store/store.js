@@ -3,6 +3,7 @@ import windowReducers from '../features/windows/windowSlice';
 import wallpaperReducers from '../features/wallpaper/wallpaperSlice'
 import youtubeReducers from '../features/youtube/youtubeSlice'
 import historyReducers from '../features/yt-history/historySlice'
+import musicPlayerReducers from '../features/music/musicSlice'
 
 const loadYoutubeState = () => {
     try {
@@ -18,7 +19,8 @@ export const store = configureStore({
         win: windowReducers,
         wall: wallpaperReducers,
         yt: youtubeReducers,
-        history: historyReducers
+        history: historyReducers,
+        music: musicPlayerReducers
     },
 
     preloadedState: {

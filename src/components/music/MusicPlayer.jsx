@@ -1,24 +1,40 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { songs } from "../../conf/songsConf"
 import { saveTrack, getStoredTracks, deleteStoredTrack } from "../../conf/musicStorageService"
+import { setCurrentTrack, setIsPlaying, clearTrack, setCurrentTime, setIsShuffle, setScreen, setVolume } from '../../features/music/musicSlice'
 
 // SCREEN CONSTANTS
 const SCREEN = { LIBRARY: 'library', PLAYER: 'player' }
 
 const MusicPlayer = () => {
-    const [screen, setScreen] = useState(SCREEN.LIBRARY)
+    const dispatch = useDispatch()
+    const {
+        currentTrackId,
+        currentIndex,
+        isPlaying,
+        currentTime: savedTime,
+        progress,
+        isShuffle,
+        volume,
+        screen,
+    } = useSelector(state => state.music)
+
+    // const [screen, setScreen] = useState(SCREEN.LIBRARY)
     const [tracks, setTracks] = useState(songs);
-    const [currentIndex, setCurrentIndex] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isShuffle, setIsShuffle] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(0.7);
-    const [lastVolume, setLastVolume] = useState(0.7);
+    // const [currentIndex, setCurrentIndex] = useState(null);
+    // const [isPlaying, setIsPlaying] = useState(false);
+    // const [isShuffle, setIsShuffle] = useState(false);
+    // const [progress, setProgress] = useState(0);
+    // const [volume, setVolume] = useState(0.7);
+    const [lastVolume, setLastVolume] = useState(volume);
     const [duration, setDuration] = useState(0);
     const [searchQuery, setSearchQuery] = useState("")
 
     const audioRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    const didRestoreRef = useRef(false)
 
     const currentTrack = currentIndex !== null ? tracks[currentIndex] : null
 
@@ -37,6 +53,35 @@ const MusicPlayer = () => {
         loadTracks();
     }, []);
 
+    // Restore playback position on remount
+    useEffect(() => {
+        if (didRestoreRef.current) return
+        if (!audioRef.current || !currentTrack) return
+
+        audioRef.current.src = currentTrack.url
+        audioRef.current.volume = volume
+
+        const handleCanPlay = () => {
+            if (didRestoreRef.current) return
+            didRestoreRef.current = true
+
+            if (savedTime > 0) {
+                audioRef.current.currentTime = savedTime
+            }
+
+            // Resume playing only if it was playing before closing
+            if (isPlaying) {
+                audioRef.current.play().catch(() => dispatch(setIsPlaying(false)))
+            }
+        }
+
+        audioRef.current.addEventListener('canplay', handleCanPlay, { once: true })
+
+        return () => {
+            audioRef.current?.removeEventListener('canplay', handleCanPlay)
+        }
+    }, [tracks])
+
     // Volume
     useEffect(() => {
         if (audioRef.current) {
@@ -46,68 +91,115 @@ const MusicPlayer = () => {
 
     // Play / Pause Song
     useEffect(() => {
-        if (!audioRef.current) return;
+        if (!audioRef.current || !didRestoreRef.current) return;
         if (isPlaying) {
-            audioRef.current.play().catch(() => setIsPlaying(false));
+            audioRef.current.play().catch(() => dispatch(setIsPlaying(false)));
         } else {
             audioRef.current.pause();
         }
-    }, [isPlaying, currentIndex]);
+    }, [isPlaying]);
 
-    const togglePlay = () => setIsPlaying(prev => !prev);
 
-    const handleTimeUpdate = () => {
-        if (!audioRef.current) return;
-        setProgress(
-            (audioRef.current.currentTime / audioRef.current.duration) * 100 || 0
-        );
-    };
+    // ─── Save playback time to Redux periodically ─────────────────────
+    const handleTimeUpdate = useCallback(() => {
+        if (!audioRef.current) return
+
+        const { currentTime, duration } = audioRef.current
+        if (!duration) return
+
+        dispatch(setCurrentTime({
+            currentTime,
+            progress: (currentTime / duration) * 100,
+        }))
+    }, [dispatch])
 
     const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration || 0);
-        }
-    };
+        if (audioRef.current) setDuration(audioRef.current.duration || 0)
+    }
 
     const handleProgressChange = (e) => {
-        const newProgress = parseFloat(e.target.value);
-        if (!audioRef.current) return;
-        audioRef.current.currentTime = (newProgress / 100) * audioRef.current.duration;
-        setProgress(newProgress);
-    };
+        if (!audioRef.current) return
+
+        const value = parseFloat(e.target.value)
+        audioRef.current.currentTime = (value / 100) * audioRef.current.duration
+
+        dispatch(setCurrentTime({
+            currentTime: audioRef.current.currentTime,
+            progress: value,
+        }))
+    }
+
+    // ─── Track selection (new song picked) ───────────────────────────
+    const selectTrack = (index) => {
+        didRestoreRef.current = true // already handled from here on
+        const track = tracks[index]
+
+        dispatch(setCurrentTrack({ id: track.id, index }))
+        dispatch(setIsPlaying(true))
+        dispatch(setScreen(SCREEN.PLAYER))
+
+        if (audioRef.current) {
+            audioRef.current.src = track.url
+            audioRef.current.volume = volume
+            audioRef.current.play().catch(() => dispatch(setIsPlaying(false)))
+        }
+    }
+
+
+    const togglePlay = () => dispatch(setIsPlaying(!isPlaying));
+
+    // const handleTimeUpdate = () => {
+    //     if (!audioRef.current) return;
+    //     setProgress(
+    //         (audioRef.current.currentTime / audioRef.current.duration) * 100 || 0
+    //     );
+    // };
+
+    // const handleLoadedMetadata = () => {
+    //     if (audioRef.current) {
+    //         setDuration(audioRef.current.duration || 0);
+    //     }
+    // };
+
+    // const handleProgressChange = (e) => {
+    //     const newProgress = parseFloat(e.target.value);
+    //     if (!audioRef.current) return;
+    //     audioRef.current.currentTime = (newProgress / 100) * audioRef.current.duration;
+    //     setProgress(newProgress);
+    // };
 
     const toggleMute = () => {
         if (volume > 0) {
             setLastVolume(volume);
-            setVolume(0);
+            dispatch(setVolume(0));
         } else {
-            setVolume(lastVolume || 0.7);
+            dispatch(setVolume(lastVolume || 0.7));
         }
     };
 
-    const nextTrack = () => {
+    const nextTrack = useCallback(() => {
         if (currentIndex === null) return
-        if (isShuffle) {
-            let next;
-            do {
-                next = Math.floor(Math.random() * tracks.length);
-            } while (next === currentIndex && tracks.length > 1);
-            setCurrentIndex(next);
-        } else {
-            setCurrentIndex((prev) => (prev + 1) % tracks.length);
-        }
-    };
+        const nextIndex = isShuffle
+            ? (() => {
+                let next
+                do { next = Math.floor(Math.random() * tracks.length) }
+                while (next === currentIndex && tracks.length > 1)
+                return next
+            })()
+            : (currentIndex + 1) % tracks.length
+        selectTrack(nextIndex)
+    }, [currentIndex, isShuffle, tracks])
 
     const prevTrack = () => {
         if (currentIndex === null) return
-        setCurrentIndex((prev) => (prev - 1 + tracks.length) % tracks.length);
+        selectTrack((currentIndex - 1 + tracks.length) % tracks.length)
     };
 
-    const selectTrack = (index) => {
-        setCurrentIndex(index)
-        setIsPlaying(true)
-        setScreen(SCREEN.PLAYER)
-    }
+    // const selectTrack = (index) => {
+    //     setCurrentIndex(index)
+    //     setIsPlaying(true)
+    //     setScreen(SCREEN.PLAYER)
+    // }
 
     // Upload songs + random covers
     const handleFileUpload = async (e) => {
@@ -136,9 +228,14 @@ const MusicPlayer = () => {
         }
 
         if (newTracks.length) {
-            setTracks(prev => [...prev, ...newTracks]);
-            selectTrack(tracks.length)
+            setTracks(prev => {
+                const updated = [...prev, ...newTracks]
+                selectTrack(updated.length - 1)
+                return updated
+            })
         }
+
+        e.target.value = ""
     };
 
     const removeTrack = async (e, id) => {
@@ -149,12 +246,12 @@ const MusicPlayer = () => {
                 const filteredTracks = prev.filter(track => track.id !== id)
                 // Adjust current index if we deleted the current or a previous track
                 const trackIdx = prev.findIndex(track => track.id === id);
+
                 if (trackIdx === currentIndex) {
-                    setIsPlaying(false);
-                    setCurrentIndex(null);
-                    setScreen(SCREEN.LIBRARY)
+                    dispatch(clearTrack())
+                    didRestoreRef.current = false
                 } else if (trackIdx < currentIndex) {
-                    setCurrentIndex(prev => prev - 1);
+                    dispatch(setCurrentTrack({ id: tracks[currentIndex].id, index: currentIndex - 1 }))
                 }
                 return filteredTracks;
             });
@@ -173,10 +270,10 @@ const MusicPlayer = () => {
     const filterQueriedTracks = tracks.filter(track => track.title.toLowerCase().includes(searchQuery.toLowerCase()) || track.artist.toLowerCase().includes(searchQuery.toLowerCase()))
 
     // Shared audio element
-    const audioEl = currentTrack && (
+    const audioEl = (
         <audio
             ref={audioRef}
-            src={currentTrack.url}
+            // src={currentTrack.url}
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
             onEnded={nextTrack}
@@ -243,7 +340,7 @@ const MusicPlayer = () => {
                 {/* Now Playing mini-bar (visible if something is playing) */}
                 {currentTrack && (
                     <div
-                        onClick={() => setScreen(SCREEN.PLAYER)}
+                        onClick={() => dispatch(setScreen(SCREEN.PLAYER))}
                         className="mx-1 mb-3 flex items-center gap-3 p-2 rounded-lg bg-white/10 border border-white/10 cursor-pointer hover:bg-white/20 transition-all group"
                     >
                         <div className="relative w-10 h-10 flex-shrink-0">
@@ -326,6 +423,7 @@ const MusicPlayer = () => {
                                             <button
                                                 onClick={(e) => removeTrack(e, track.id)}
                                                 className="opacity-0 group-hover:opacity-100 p-1 text-white hover:text-red-500 cursor-pointer transition-all rounded"
+                                                title="Delete track"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -361,7 +459,7 @@ const MusicPlayer = () => {
             {/* Top Bar: Back + Track Counter */}
             <div className="flex items-center justify-between px-1 pt-3 pb-2">
                 <button
-                    onClick={() => setScreen(SCREEN.LIBRARY)}
+                    onClick={() => dispatch(setScreen(SCREEN.LIBRARY))}
                     className="flex items-center gap-1 text-white/80 hover:text-white text-sm font-semibold transition-all cursor-pointer group"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -417,7 +515,7 @@ const MusicPlayer = () => {
             {/* Controls */}
             <div className="flex items-center justify-between px-2 my-2">
                 <button
-                    onClick={() => setIsShuffle(!isShuffle)}
+                    onClick={() => dispatch(setIsShuffle(!isShuffle))}
                     className={`transition-all hover:scale-110 cursor-pointer ${isShuffle ? 'text-pink-400' : 'text-white/50 hover:text-white'}`}
                     title="Shuffle"
                 >
@@ -479,7 +577,7 @@ const MusicPlayer = () => {
                     max="1"
                     step="0.01"
                     value={volume}
-                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                    onChange={(e) => dispatch(setVolume(parseFloat(e.target.value)))}
                     className="flex-1 h-0.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-white/50 hover:accent-white/70"
                 />
             </div>
