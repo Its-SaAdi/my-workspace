@@ -9,7 +9,7 @@ const Wallpaper = () => {
     const wallpaperId = useSelector(state => state.wall.wallpaperId);
 
     const inputFileRef = useRef(null);
-    
+
     const [wallpapers, setWallpapers] = useState(BUILTIN_WALLPAPERS);
     const [isLoading, setIsLoading] = useState(true)
 
@@ -83,46 +83,48 @@ const Wallpaper = () => {
     }
 
     const renderGrid = (items) => (
-        <div className="grid grid-cols-2 gap-2 ">
-            {items.map(wallpaper => {
-                const isSelected = wallpaperId === wallpaper.id;
+        <div className="@container">
+            <div className="grid grid-cols-2 gap-2 @min-[500px]:grid-cols-3 @min-[700px]:grid-cols-4 @min-[900px]:grid-cols-5">
+                {items.map(wallpaper => {
+                    const isSelected = wallpaperId === wallpaper.id;
 
-                return (
-                    <div
-                        key={wallpaper.id}
-                        onClick={() => selectWallpaper(wallpaper.id)}
-                        className={`
-                            group relative cursor-pointer rounded-md overflow-hidden transition-all duration-200
-                            ${isSelected ? "ring-2 ring-white/80" : "opacity-80 hover:opacity-100"}
-                        `}
-                    >
-                        <img
-                            src={wallpaper.thumbnail}
-                            alt={wallpaper.name}
-                            loading="lazy"
-                            className="w-full h-full object-cover"
-                        />
+                    return (
+                        <div
+                            key={wallpaper.id}
+                            onClick={() => selectWallpaper(wallpaper.id)}
+                            className={`
+                                group relative aspect-video cursor-pointer rounded-md overflow-hidden transition-all duration-200
+                                ${isSelected ? "ring-2 ring-white/80" : "opacity-80 hover:opacity-100"}
+                            `}
+                        >
+                            <img
+                                src={wallpaper.thumbnail}
+                                alt={wallpaper.name}
+                                loading="lazy"
+                                className="w-full h-full object-cover"
+                            />
 
-                        {/* Selected overlay */}
-                        {isSelected && (
-                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                <span className="text-white text-lg">✓</span>
-                            </div>
-                        )}
+                            {/* Selected overlay */}
+                            {isSelected && (
+                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                    <span className="text-white text-lg">✓</span>
+                                </div>
+                            )}
 
-                        {wallpaper.type === "custom" && (
-                            <button
-                                type="button"
-                                aria-label="Delete wallpaper"
-                                className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 transition cursor-pointer"
-                                onClick={(e) => handleDelete(e, wallpaper.id)}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash2-icon lucide-trash-2 text-white/60 hover:text-red-500 transition"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
-                            </button>
-                        )}
-                    </div>
-                );
-            })}
+                            {wallpaper.type === "custom" && (
+                                <button
+                                    type="button"
+                                    aria-label="Delete wallpaper"
+                                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 transition cursor-pointer"
+                                    onClick={(e) => handleDelete(e, wallpaper.id)}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash2-icon lucide-trash-2 text-white/60 hover:text-red-500 transition"><path d="M10 11v6" /><path d="M14 11v6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 

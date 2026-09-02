@@ -1,5 +1,6 @@
 import { useEffect } from "react"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { openWindow } from "./features/windows/windowSlice";
 import { BUILTIN_WALLPAPERS } from "./conf/wallpaperConf";
 import { getCustomWallpapers } from "./conf/wallpaperStorageService";
 import Clock from "./components/clock/Clock"
@@ -9,6 +10,7 @@ import Window from "./components/window/Window"
 function App() {
   // const [windowState, setWindowState] = useState([]);
   // let nextWindowId = 1;
+  const dispatch = useDispatch()
 
   const windowState = useSelector((state) => state.win);
   const wallpaperId = useSelector((state) => state.wall.wallpaperId);
@@ -16,6 +18,23 @@ function App() {
   const applyBackground = (url) => {
     document.getElementById("screen-bg").style.backgroundImage = `url(${url})`;
   }
+
+  useEffect(() => {
+    const hasSeenIntroScreen = localStorage.getItem("LOFI_WORKSPACE_INTRO_SEEN")
+
+    if (hasSeenIntroScreen === "true") {
+      return
+    }
+
+    dispatch(openWindow({
+      id: "welcome",
+      toolName: "Welcome",
+      position: {
+        xOffset: 500,
+        yOffset: 30,
+      }
+    }))
+  }, [dispatch])
 
   useEffect(() => {
     const savedId = localStorage.getItem("CURRENT_WALLPAPER_ID") || wallpaperId;

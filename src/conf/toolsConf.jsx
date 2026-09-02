@@ -1,3 +1,4 @@
+import Welcome from "../components/welcome/Welcome";
 import Notes from "../components/notes/Notes";
 import EnhancedNotes from '../components/notes/EnhancedNotes'
 import Timer from "../components/timer/Timer";
@@ -8,6 +9,11 @@ import MusicPlayer from "../components/music/MusicPlayer";
 import YouTube from "../components/youtube/YouTube";
 
 export const tools = [
+    {
+        id: "welcome",
+        title: "Welcome",
+        component: <Welcome />
+    },
     {
         id: "notes",
         title: "Notes",

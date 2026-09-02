@@ -60,21 +60,9 @@ const bringToFront = (state, targetWindow) => {
 /* ----------------------------- Initial State and Slice ----------------------------- */
 
 const initialValue = {
-    windows: [
-        {
-            id: "demo-window",
-            toolName: "Tool Name",
-            element: "Element to be rendered",
-            isMinimized: false,
-            position: {
-                xOffset: 20,
-                yOffset: 20,
-            },
-            zIndex: 1,
-        }
-    ],
-    zCounter: 1,
-    activeWindowId: "demo-window",
+    windows: [],
+    zCounter: 0,
+    activeWindowId: "",
 }
 
 export const windowSlice = createSlice({
@@ -102,7 +90,7 @@ export const windowSlice = createSlice({
                 ...newWindow,
                 zIndex: state.zCounter,
                 isMinimized: newWindow.isMinimized ?? false,
-                position: { xOffset: newOffset, yOffset: newOffset }
+                position: newWindow.position ?? { xOffset: newOffset, yOffset: newOffset }
             });
             state.activeWindowId = newWindow.id;
         },

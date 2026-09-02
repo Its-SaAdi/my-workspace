@@ -13,6 +13,8 @@ dist-ssr
 *.local
 *.pdf
 # fixes.txt
+Window UI.png
+Design UI.png
 
 # Editor directories and files
 .vscode/*

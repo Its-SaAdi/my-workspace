@@ -36,6 +36,8 @@ const Taskbar = () => {
                     const isActive = window && !window.isMinimized;
                     const isMinimized = window && window.isMinimized;
 
+                    if (tool.id === 'welcome') return
+
                     return (
                         <div key={tool.id} className='relative group'>
 

@@ -1,16 +1,54 @@
-# React + Vite
+# Lofi Workspace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A desktop-inspired productivity workspace built with React and Tailwind CSS. Lofi Workspace brings everyday productivity tools into a calm, distraction-free environment with draggable and resizable windows.
 
-Currently, two official plugins are available:
+## 🎯 Purpose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Lofi Workspace was built as an exploration of creating a desktop-like web experience with modern React patterns, reusable components, Redux-based window management, responsive container queries, and browser-based data persistence.
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 📝 **Notes** — Capture and manage ideas quickly
+- ☑️ **Todos** — Keep track of tasks and priorities
+- 🖼️ **Wallpaper** — Customize your workspace with built-in or custom wallpapers
+- 🎵 **Music Player** — Listen to music while you work
+- ⏱️ **Timer** — Stay focused with a built-in timer
+- ▶️ **YouTube** — Keep YouTube content within reach
+- 🪟 **Window Management** — Drag, resize, minimize, and close tools like a desktop
+- 💾 **Local Persistence** — Preserve notes, todos, and workspace data using browser storage
+- 📱 **Responsive UI** — Container-based layouts adapt to resizable application windows
+- 👋 **First-Time Welcome** — A lightweight onboarding window introduces new users to the workspace
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React**
+- **Vite**
+- **Tailwind CSS**
+- **Redux Toolkit**
+- **JavaScript**
+- **LocalStorage / IndexedDB**
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm
+
+### Installation
+
+```bash
+git clone https://github.com/Its-SaAdi/my-workspace.git
+cd my-workspace
+npm install
+npm run dev
+```
+
+
+## 🔮 Future Improvements
+- Global keyboard shortcuts
+- Multiple workspace layouts
+- More productivity tools
+- Improved music library management
+- Cloud synchronization
+- Custom themes and UI personalization

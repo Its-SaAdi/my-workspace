@@ -6,6 +6,8 @@ import { useWindowBounds } from '../../hooks/useWindowBounds'
 import { useWindowDrag } from '../../hooks/useWindowDrag'
 import { useWindowResize } from '../../hooks/useWindowResize'
 
+const INTRO_SCREEN_STORAGE_KEY = "LOFI_WORKSPACE_INTRO_SEEN";
+
 const Window = ({ windowData }) => {
   const dispatch = useDispatch();
 
@@ -23,7 +25,14 @@ const Window = ({ windowData }) => {
   useWindowResize(windowRef, position)
 
   // --- Window controls ---
-  const handleClose = () => dispatch(closeWindow(windowData.id));
+  const handleClose = () => {
+    if (windowData.id === "welcome") {
+      localStorage.setItem(INTRO_SCREEN_STORAGE_KEY, "true");
+    }
+
+    dispatch(closeWindow(windowData.id));
+  };
+
   const handleMinimize = () => dispatch(minimizeWindow(windowData.id));
 
   // If minimized, don't render the window at all
